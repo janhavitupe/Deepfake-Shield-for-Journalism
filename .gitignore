@@ -1,0 +1,73 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Model files (too large for git)
+*.pkl
+*.h5
+*.pth
+*.onnx
+
+# Data files (too large for git)
+dfdc/raw_tmp/*.mp4
+dfdc/raw_tmp/*.avi
+dfdc/raw_tmp/*.mov
+
+# Keep metadata
+!dfdc/raw_tmp/metadata.json
+
+# CSV files (keep smaller ones, ignore large ones)
+# Uncomment if CSVs are too large
+# *.csv
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Streamlit
+.streamlit/
+
+# Environment variables
+.env
+.env.local
