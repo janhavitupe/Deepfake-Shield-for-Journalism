@@ -65,8 +65,9 @@ desktop.ini
 *.swo
 *~
 
-# Streamlit
-.streamlit/
+# Streamlit (but keep config)
+.streamlit/*
+!.streamlit/config.toml
 
 # Environment variables
 .env
