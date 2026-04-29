@@ -51,28 +51,28 @@ def evaluate_model():
     # Load model
     print("\n1. Loading model...")
     if not Path(MODEL_PATH).exists():
-        print(f"   ❌ Model not found: {MODEL_PATH}")
+        print(f"   [ERROR] Model not found: {MODEL_PATH}")
         return
     
     model = joblib.load(MODEL_PATH)
-    print(f"   ✓ Model loaded successfully")
+    print(f"   [OK] Model loaded successfully")
     
     # Load training data (contains features + labels)
     print("\n2. Loading test data...")
     if not Path(TRAINING_DATA).exists():
-        print(f"   ❌ Training data not found: {TRAINING_DATA}")
+        print(f"   [ERROR] Training data not found: {TRAINING_DATA}")
         return
     
     df = pd.read_csv(TRAINING_DATA)
-    print(f"   ✓ Loaded {len(df)} samples")
+    print(f"   [OK] Loaded {len(df)} samples")
     
     # Load ground truth from metadata
     print("\n3. Loading ground truth labels...")
     try:
         ground_truth = load_ground_truth()
-        print(f"   ✓ Loaded {len(ground_truth)} ground truth labels")
+        print(f"   [OK] Loaded {len(ground_truth)} ground truth labels")
     except Exception as e:
-        print(f"   ⚠️  Could not load metadata: {e}")
+        print(f"   [WARN] Could not load metadata: {e}")
         print(f"   Using labels from training data instead")
         ground_truth = None
     
@@ -86,7 +86,7 @@ def evaluate_model():
     y_pred = model.predict(X)
     y_pred_proba = model.predict_proba(X)[:, 1]
     
-    print(f"   ✓ Predictions complete")
+    print(f"   [OK] Predictions complete")
     
     # Compute metrics
     print("\n" + "="*70)
@@ -103,7 +103,7 @@ def evaluate_model():
     except:
         roc_auc = None
     
-    print(f"\n📊 Overall Metrics:")
+    print(f"\nOverall Metrics:")
     print(f"   Accuracy:  {accuracy:.4f} ({accuracy*100:.2f}%)")
     print(f"   Precision: {precision:.4f} ({precision*100:.2f}%)")
     print(f"   Recall:    {recall:.4f} ({recall*100:.2f}%)")
@@ -112,7 +112,7 @@ def evaluate_model():
         print(f"   ROC-AUC:   {roc_auc:.4f} ({roc_auc*100:.2f}%)")
     
     # Confusion Matrix
-    print(f"\n📋 Confusion Matrix:")
+    print(f"\nConfusion Matrix:")
     cm = confusion_matrix(y_true, y_pred)
     print(f"\n                Predicted")
     print(f"              REAL  FAKE")
@@ -127,7 +127,7 @@ def evaluate_model():
     false_positive_rate = fp / (fp + tn) if (fp + tn) > 0 else 0
     false_negative_rate = fn / (fn + tp) if (fn + tp) > 0 else 0
     
-    print(f"\n📈 Detailed Metrics:")
+    print(f"\nDetailed Metrics:")
     print(f"   True Positives:  {tp:4d} (Correctly identified FAKE)")
     print(f"   True Negatives:  {tn:4d} (Correctly identified REAL)")
     print(f"   False Positives: {fp:4d} (REAL classified as FAKE)")
@@ -138,13 +138,13 @@ def evaluate_model():
     print(f"   False Negative Rate: {false_negative_rate:.4f} ({false_negative_rate*100:.2f}%)")
     
     # Classification Report
-    print(f"\n📑 Classification Report:")
+    print(f"\nClassification Report:")
     print("\n" + classification_report(y_true, y_pred, 
                                        target_names=['REAL', 'FAKE'],
                                        digits=4))
     
     # Class distribution
-    print(f"\n📊 Class Distribution:")
+    print(f"\nClass Distribution:")
     print(f"   Ground Truth:")
     print(f"      REAL (0): {(y_true == 0).sum():4d} ({(y_true == 0).sum()/len(y_true)*100:.2f}%)")
     print(f"      FAKE (1): {(y_true == 1).sum():4d} ({(y_true == 1).sum()/len(y_true)*100:.2f}%)")
@@ -153,7 +153,7 @@ def evaluate_model():
     print(f"      FAKE (1): {(y_pred == 1).sum():4d} ({(y_pred == 1).sum()/len(y_pred)*100:.2f}%)")
     
     # Prediction confidence analysis
-    print(f"\n🎯 Prediction Confidence Analysis:")
+    print(f"\nPrediction Confidence Analysis:")
     high_conf_correct = np.sum((y_pred_proba > 0.7) & (y_pred == y_true)) + \
                         np.sum((y_pred_proba < 0.3) & (y_pred == y_true))
     high_conf_total = np.sum((y_pred_proba > 0.7) | (y_pred_proba < 0.3))
@@ -167,7 +167,7 @@ def evaluate_model():
     print(f"   Uncertain (40-60%): {uncertain} predictions ({uncertain/len(y_pred)*100:.2f}%)")
     
     # Save detailed results
-    print(f"\n💾 Saving detailed results...")
+    print(f"\nSaving detailed results...")
     
     # Create results dataframe
     results_df = df.copy()
@@ -184,7 +184,7 @@ def evaluate_model():
     # Save to CSV
     results_path = OUTPUT_DIR / "detailed_predictions.csv"
     results_df.to_csv(results_path, index=False)
-    print(f"   ✓ Detailed predictions saved to: {results_path}")
+    print(f"   [OK] Detailed predictions saved to: {results_path}")
     
     # Save metrics summary
     metrics_summary = {
@@ -198,10 +198,10 @@ def evaluate_model():
     metrics_df = pd.DataFrame(metrics_summary)
     metrics_path = OUTPUT_DIR / "metrics_summary.csv"
     metrics_df.to_csv(metrics_path, index=False)
-    print(f"   ✓ Metrics summary saved to: {metrics_path}")
+    print(f"   [OK] Metrics summary saved to: {metrics_path}")
     
     # Generate visualizations
-    print(f"\n📊 Generating visualizations...")
+    print(f"\nGenerating visualizations...")
     
     # 1. Confusion Matrix Heatmap
     plt.figure(figsize=(8, 6))
@@ -215,7 +215,7 @@ def evaluate_model():
     cm_path = OUTPUT_DIR / "confusion_matrix.png"
     plt.savefig(cm_path, dpi=300, bbox_inches='tight')
     plt.close()
-    print(f"   ✓ Confusion matrix saved to: {cm_path}")
+    print(f"   [OK] Confusion matrix saved to: {cm_path}")
     
     # 2. ROC Curve
     if roc_auc:
@@ -236,7 +236,7 @@ def evaluate_model():
         roc_path = OUTPUT_DIR / "roc_curve.png"
         plt.savefig(roc_path, dpi=300, bbox_inches='tight')
         plt.close()
-        print(f"   ✓ ROC curve saved to: {roc_path}")
+        print(f"   [OK] ROC curve saved to: {roc_path}")
     
     # 3. Prediction Probability Distribution
     plt.figure(figsize=(10, 6))
@@ -257,7 +257,7 @@ def evaluate_model():
     prob_path = OUTPUT_DIR / "probability_distribution.png"
     plt.savefig(prob_path, dpi=300, bbox_inches='tight')
     plt.close()
-    print(f"   ✓ Probability distribution saved to: {prob_path}")
+    print(f"   [OK] Probability distribution saved to: {prob_path}")
     
     # 4. Metrics Bar Chart
     plt.figure(figsize=(10, 6))
@@ -283,10 +283,10 @@ def evaluate_model():
     metrics_bar_path = OUTPUT_DIR / "metrics_bar_chart.png"
     plt.savefig(metrics_bar_path, dpi=300, bbox_inches='tight')
     plt.close()
-    print(f"   ✓ Metrics bar chart saved to: {metrics_bar_path}")
+    print(f"   [OK] Metrics bar chart saved to: {metrics_bar_path}")
     
     # Find misclassified examples
-    print(f"\n🔍 Analyzing Misclassifications...")
+    print(f"\nAnalyzing Misclassifications...")
     misclassified = results_df[results_df['correct'] == 0]
     
     if len(misclassified) > 0:
@@ -294,7 +294,7 @@ def evaluate_model():
         
         # False Positives (REAL predicted as FAKE)
         false_positives = misclassified[misclassified['y_true'] == 0]
-        print(f"\n   False Positives (REAL → FAKE): {len(false_positives)}")
+        print(f"\n   False Positives (REAL -> FAKE): {len(false_positives)}")
         if len(false_positives) > 0:
             print(f"      Average confidence: {false_positives['y_pred_proba'].mean():.3f}")
             print(f"      Top 5 most confident mistakes:")
@@ -304,7 +304,7 @@ def evaluate_model():
         
         # False Negatives (FAKE predicted as REAL)
         false_negatives = misclassified[misclassified['y_true'] == 1]
-        print(f"\n   False Negatives (FAKE → REAL): {len(false_negatives)}")
+        print(f"\n   False Negatives (FAKE -> REAL): {len(false_negatives)}")
         if len(false_negatives) > 0:
             print(f"      Average confidence: {(1 - false_negatives['y_pred_proba']).mean():.3f}")
             print(f"      Top 5 most confident mistakes:")
@@ -315,34 +315,34 @@ def evaluate_model():
         # Save misclassified examples
         misclass_path = OUTPUT_DIR / "misclassified_videos.csv"
         misclassified.to_csv(misclass_path, index=False)
-        print(f"\n   ✓ Misclassified examples saved to: {misclass_path}")
+        print(f"\n   [OK] Misclassified examples saved to: {misclass_path}")
     else:
-        print(f"   🎉 Perfect classification! No misclassifications found.")
+        print(f"   Perfect classification! No misclassifications found.")
     
     # Summary
     print("\n" + "="*70)
     print("EVALUATION COMPLETE")
     print("="*70)
-    print(f"\n📁 All results saved to: {OUTPUT_DIR}/")
-    print(f"\n📊 Key Findings:")
-    print(f"   • Model correctly classified {(y_true == y_pred).sum()}/{len(y_true)} videos")
-    print(f"   • Accuracy: {accuracy*100:.2f}%")
-    print(f"   • Best at detecting: {'FAKE' if recall > specificity else 'REAL'} videos")
-    print(f"   • {len(misclassified)} videos need further review")
+    print(f"\nAll results saved to: {OUTPUT_DIR}/")
+    print(f"\nKey Findings:")
+    print(f"   - Model correctly classified {(y_true == y_pred).sum()}/{len(y_true)} videos")
+    print(f"   - Accuracy: {accuracy*100:.2f}%")
+    print(f"   - Best at detecting: {'FAKE' if recall > specificity else 'REAL'} videos")
+    print(f"   - {len(misclassified)} videos need further review")
     
     if accuracy < 0.6:
-        print(f"\n⚠️  Model performance is below 60%. Consider:")
-        print(f"   • Collecting more training data")
-        print(f"   • Balancing the dataset (currently {(y_true == 1).sum()/len(y_true)*100:.1f}% FAKE)")
-        print(f"   • Feature engineering improvements")
-        print(f"   • Hyperparameter tuning")
+        print(f"\nWARNING: Model performance is below 60%. Consider:")
+        print(f"   - Collecting more training data")
+        print(f"   - Balancing the dataset (currently {(y_true == 1).sum()/len(y_true)*100:.1f}% FAKE)")
+        print(f"   - Feature engineering improvements")
+        print(f"   - Hyperparameter tuning")
     elif accuracy < 0.8:
-        print(f"\n✓ Model performance is moderate. Room for improvement:")
-        print(f"   • Consider ensemble methods")
-        print(f"   • Add more diverse training samples")
-        print(f"   • Fine-tune decision threshold")
+        print(f"\nModel performance is moderate. Room for improvement:")
+        print(f"   - Consider ensemble methods")
+        print(f"   - Add more diverse training samples")
+        print(f"   - Fine-tune decision threshold")
     else:
-        print(f"\n🎉 Excellent model performance!")
+        print(f"\nExcellent model performance!")
     
     print("\n" + "="*70)
 
@@ -350,6 +350,6 @@ if __name__ == "__main__":
     try:
         evaluate_model()
     except Exception as e:
-        print(f"\n❌ Error during evaluation: {e}")
+        print(f"\nError during evaluation: {e}")
         import traceback
         traceback.print_exc()
